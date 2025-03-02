@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "strict": false, // Nie wymusza pełnego TypeScript
+    "jsx": "preserve",
+    "target": "esnext",
+    "module": "esnext",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true
+  }
+}
