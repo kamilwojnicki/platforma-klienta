@@ -5,43 +5,36 @@ export default async function handler(req, res) {
         const base = new Airtable({ apiKey: process.env.AIRTABLE_ACCESS_TOKEN })
             .base(process.env.AIRTABLE_BASE_ID);
 
-        // Pobieramy WSZYSTKIE rekordy (np. klient "Piko-Sport")
+        // Odczyt parametru z query, np. ?client=66 projekt
+        // Jeśli brak parametru, domyślnie np. "Piko-Sport"
+        const clientParam = req.query.client || "Piko-Sport";
+
+        // Pobieramy WSZYSTKIE rekordy
         const allRecords = await base(process.env.AIRTABLE_TABLE_NAME)
             .select({ pageSize: 100 })
             .all();
 
-        // Filtrowanie po kliencie (jeśli chcesz)
-        const filtered = allRecords.filter(record => 
-            record.fields["Klient uproszczony"] === "Piko-Sport"
+        // Filtrowanie po kliencie uproszczonym
+        const filtered = allRecords.filter((record) => 
+            record.fields["Klient uproszczony"] === clientParam
         );
 
-        // Mapowanie pól
-        const orders = filtered.map(record => {
-            const numerZamowienia = record.fields["Zamówienie"] || "Brak";
-            
-            const wizualizacje = Array.isArray(record.fields["Wizualizacje"])
-                ? record.fields["Wizualizacje"].map(obj => obj.url)
-                : [];
-
-            const dataDodania = Array.isArray(record.fields["Data dodania zamówienia"])
-                ? record.fields["Data dodania zamówienia"][0]
-                : record.fields["Data dodania zamówienia"] || "Brak";
-
-            const dataWysylki = Array.isArray(record.fields["Data do wysyłki"])
-                ? record.fields["Data do wysyłki"][0]
-                : record.fields["Data do wysyłki"] || "Brak";
-
-            // Dodajemy pole "Status wysyłki"
-            const statusWysylki = record.fields["Status wysyłki"] || ""; 
-            // Single select: "Wysłane" albo puste
-
+        // Mapowanie pól (zostaje jak było)
+        const orders = filtered.map((record) => {
+            // ...
             return {
                 id: record.id,
-                numerZamowienia,
-                wizualizacje,
-                dataDodania,
-                dataWysylki,
-                statusWysylki // ← kluczowe, by frontend mógł go używać
+                numerZamowienia: record.fields["Zamówienie"] || "Brak",
+                wizualizacje: Array.isArray(record.fields["Wizualizacje"])
+                  ? record.fields["Wizualizacje"].map(obj => obj.url)
+                  : [],
+                dataDodania: Array.isArray(record.fields["Data dodania zamówienia"])
+                  ? record.fields["Data dodania zamówienia"][0]
+                  : record.fields["Data dodania zamówienia"] || "Brak",
+                dataWysylki: Array.isArray(record.fields["Data do wysyłki"])
+                  ? record.fields["Data do wysyłki"][0]
+                  : record.fields["Data do wysyłki"] || "Brak",
+                statusWysylki: record.fields["Status wysyłki"] || ""
             };
         });
 
