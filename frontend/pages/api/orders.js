@@ -17,30 +17,31 @@ export default async function handler(req, res) {
 
         // Mapowanie pól
         const orders = filtered.map(record => {
-            // Numer zamówienia
             const numerZamowienia = record.fields["Zamówienie"] || "Brak";
             
-            // Wizualizacje (tablica obiektów z polami .url)
             const wizualizacje = Array.isArray(record.fields["Wizualizacje"])
                 ? record.fields["Wizualizacje"].map(obj => obj.url)
                 : [];
 
-            // Data dodania zamówienia (lookup może zwracać tablicę, więc bierzemy pierwszy element)
             const dataDodania = Array.isArray(record.fields["Data dodania zamówienia"])
                 ? record.fields["Data dodania zamówienia"][0]
                 : record.fields["Data dodania zamówienia"] || "Brak";
 
-            // Data do wysyłki (lookup również może zwracać tablicę)
             const dataWysylki = Array.isArray(record.fields["Data do wysyłki"])
                 ? record.fields["Data do wysyłki"][0]
                 : record.fields["Data do wysyłki"] || "Brak";
 
+            // Dodajemy pole "Status wysyłki"
+            const statusWysylki = record.fields["Status wysyłki"] || ""; 
+            // Single select: "Wysłane" albo puste
+
             return {
-                id: record.id,               // ID rekordu w Airtable, ważne do szczegółów
+                id: record.id,
                 numerZamowienia,
                 wizualizacje,
                 dataDodania,
-                dataWysylki
+                dataWysylki,
+                statusWysylki // ← kluczowe, by frontend mógł go używać
             };
         });
 
