@@ -1,22 +1,26 @@
-// frontend/components/Dashboard/DashboardPage.js
 import { useEffect, useState } from "react";
 import OrdersInProgress from "./OrdersInProgress";
 import OrdersHistory from "./OrdersHistory";
 
 export default function DashboardPage() {
-  // Stan przechowujący wybranego klienta
   const [selectedClient, setSelectedClient] = useState("Piko-Sport");
-  const [orders, setOrders] = useState([]);
+
+  // Zamiast "orders", mamy "inProgress" i "last5History"
+  const [inProgress, setInProgress] = useState([]);
+  const [last5History, setLast5History] = useState([]);
+
   const [loading, setLoading] = useState(true);
 
   const clients = ["Piko-Sport", "66 projekt", "SoundVoice OÜ"];
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/orders?client=${encodeURIComponent(selectedClient)}`)
+    fetch(`/api/orders?client=${encodeURIComponent(selectedClient)}&mode=dashboard`)
       .then((res) => res.json())
       .then((data) => {
-        setOrders(data);
+        // data = { inProgress: [...], last5History: [...] }
+        setInProgress(data.inProgress);
+        setLast5History(data.last5History);
         setLoading(false);
       })
       .catch((err) => {
@@ -33,7 +37,7 @@ export default function DashboardPage() {
     <div style={styles.container}>
       <h1>Witaj w swoim panelu!</h1>
 
-      {/* MODUŁ: Wybór klienta */}
+      {/* Wybór klienta */}
       <div style={styles.clientSelector}>
         <label htmlFor="clientSelect" style={{ marginRight: "10px" }}>
           Wybierz klienta:
@@ -52,11 +56,9 @@ export default function DashboardPage() {
         </select>
       </div>
 
-      {/* Moduł 1: Trwające zamówienia */}
-      <OrdersInProgress orders={orders} />
-
-      {/* Moduł 2: Historia zamówień */}
-      <OrdersHistory orders={orders} />
+      {/* Przekazujemy inProgress i last5History do modułów */}
+      <OrdersInProgress orders={inProgress} />
+      <OrdersHistory orders={last5History} />
     </div>
   );
 }

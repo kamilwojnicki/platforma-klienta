@@ -2,27 +2,12 @@ import Link from "next/link";
 import styles from "./dashboardTable.module.css";
 
 export default function OrdersHistory({ orders }) {
-  // Zamówienie wysłane = statusWysylki niepuste
-  let sentOrders = orders.filter((order) => order.statusWysylki);
-
-  // Sortowanie po dacieWysylki malejąco (najnowsze na górze)
-  // Najpierw konwertujemy dataWysylki do Date, jeśli to string "YYYY-MM-DD"
-  sentOrders = sentOrders.sort((a, b) => {
-    const dateA = a.dataWysylki ? new Date(a.dataWysylki) : new Date(0);
-    const dateB = b.dataWysylki ? new Date(b.dataWysylki) : new Date(0);
-
-    // Sort malejąco -> nowsza data = większa, powinna być wyżej
-    return dateB - dateA; // dateB - dateA => nowsza data (większa) jest wyżej
-  });
-
-  // Wyświetlamy tylko 5
-  sentOrders = sentOrders.slice(0, 5);
-
+  // 'orders' to już last5History z API
   return (
     <div className={styles.container}>
       <h2>Historia zamówień</h2>
 
-      {sentOrders.length === 0 ? (
+      {orders.length === 0 ? (
         <p>Brak zrealizowanych zamówień.</p>
       ) : (
         <table className={styles.table}>
@@ -37,10 +22,12 @@ export default function OrdersHistory({ orders }) {
             </tr>
           </thead>
           <tbody>
-            {sentOrders.map((order) => (
+            {orders.map((order) => (
               <tr key={order.id} className={styles.row}>
                 <td className={styles.td}>{order.numerZamowienia}</td>
-                <td className={`${styles.td} ${styles.statusSent}`}>Wysłane</td>
+                <td className={`${styles.td} ${styles.statusSent}`}>
+                  Wysłane
+                </td>
                 <td className={styles.td}>
                   {Array.isArray(order.wizualizacje) && order.wizualizacje.length > 0
                     ? order.wizualizacje.map((url, index) => (
@@ -66,7 +53,10 @@ export default function OrdersHistory({ orders }) {
         </table>
       )}
 
-      <button className={styles.showAllBtn} onClick={() => alert("Przejdź do /orders")}>
+      <button
+        className={styles.showAllBtn}
+        onClick={() => alert("Przejdź do /orders")}
+      >
         Zobacz wszystkie
       </button>
     </div>
