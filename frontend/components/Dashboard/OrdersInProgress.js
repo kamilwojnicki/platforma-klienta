@@ -43,9 +43,9 @@ export default function OrdersInProgress({ orders }) {
                 <td className={styles.td}>{order.dataDodania}</td>
                 <td className={styles.td}>{order.dataWysylki}</td>
                 <td className={styles.td}>
-                  <Link href={`/dashboard/${order.id}`}>
-                    <button className={styles.button}>Zobacz szczegóły</button>
-                  </Link>
+                <Link href={`/dashboard/${order.numerZamowienia}`}>
+  <button className={styles.button}>Zobacz szczegóły</button>
+</Link>
                 </td>
               </tr>
             ))}

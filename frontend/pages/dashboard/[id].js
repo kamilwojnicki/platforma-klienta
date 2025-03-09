@@ -31,20 +31,20 @@ export default function OrderDetailsPage({ orderData, suborders }) {
 
       <hr style={{ margin: "20px 0" }} />
 
-      <h2>Podzamówienia (Suborders)</h2>
-      {suborders.length === 0 ? (
-        <p>Brak podzamówień w tym zamówieniu.</p>
-      ) : (
-        <div style={styles.subordersGrid}>
-          {suborders.map((sub) => (
-            <SuborderCard
-              key={sub.id}
-              sub={sub}
-              onDomowienie={handleDomowienie}
-            />
-          ))}
-        </div>
-      )}
+
+<h2>Podzamówienia (Suborders)</h2>
+{suborders.length === 0 ? (
+  <p>Brak podzamówień w tym zamówieniu.</p>
+) : (
+  <div style={detailsStyles.subordersGrid}>
+    {suborders.map((sub) => (
+      <SuborderCard key={sub.id} sub={sub} />
+    ))}
+  </div>
+)}
+
+
+
     </div>
   );
 }
@@ -131,3 +131,11 @@ export async function getServerSideProps(context) {
     },
   };
 }
+
+const detailsStyles = {
+    subordersGrid: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "20px",
+    },
+  };
