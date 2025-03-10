@@ -2,12 +2,17 @@
 
 import { useState } from "react";
 import SuborderProductsModal from "./SuborderProductsModal";
+import ReorderModal from "../ReorderModal";  // Dodajemy modal „Zrób domówienie”
 
 export default function SuborderCard({ sub }) {
   const [modalOpen, setModalOpen] = useState(false);
+  const [reorderModalOpen, setReorderModalOpen] = useState(false);
 
   const handleOpenModal = () => setModalOpen(true);
   const handleCloseModal = () => setModalOpen(false);
+
+  const handleOpenReorderModal = () => setReorderModalOpen(true);
+  const handleCloseReorderModal = () => setReorderModalOpen(false);
 
   return (
     <div style={cardStyles.card}>
@@ -30,16 +35,24 @@ export default function SuborderCard({ sub }) {
         </p>
       </div>
 
+      {/* Przycisk do wyświetlenia pozycji podzamówienia */}
       <button style={cardStyles.button} onClick={handleOpenModal}>
         Pokaż pozycje
       </button>
 
-      <button style={cardStyles.button} onClick={() => alert("Zrób domówienie")}>
+      {/* Przycisk do otwarcia modala „Zrób domówienie” */}
+      <button style={cardStyles.button} onClick={handleOpenReorderModal}>
         Zrób domówienie
       </button>
 
+      {/* Modal wyświetlający pozycje podzamówienia */}
       {modalOpen && (
         <SuborderProductsModal suborderId={sub.suborderNumber} onClose={handleCloseModal} />
+      )}
+
+      {/* Modal „Zrób domówienie” */}
+      {reorderModalOpen && (
+        <ReorderModal suborder={sub} onClose={handleCloseReorderModal} />
       )}
     </div>
   );
