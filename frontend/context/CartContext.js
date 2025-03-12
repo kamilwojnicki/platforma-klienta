@@ -1,32 +1,40 @@
 // frontend/context/CartContext.js
-import { createContext, useState, useContext } from "react";
+import { createContext, useContext, useState } from "react";
 
 const CartContext = createContext();
+
+export function useCart() {
+  return useContext(CartContext);
+}
 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
 
+  // Dodawanie nowego elementu do koszyka
   const addToCart = (item) => {
     setCart((prev) => [...prev, item]);
   };
 
-  const removeFromCart = (id) => {
-    setCart((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const updateCartItem = (id, newData) => {
+  // Edycja istniejącego elementu w koszyku (po suborderNumber)
+  const updateCartItem = (suborderNumber, updatedPositions) => {
     setCart((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, ...newData } : item))
+      prev.map((cartItem) => {
+        if (cartItem.suborder.suborderNumber === suborderNumber) {
+          return { ...cartItem, positions: updatedPositions };
+        }
+        return cartItem;
+      })
     );
   };
 
+  // Usuwanie
+  const removeFromCart = (suborderNumber) => {
+    setCart((prev) => prev.filter(item => item.suborder.suborderNumber !== suborderNumber));
+  };
+
   return (
-    <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateCartItem }}>
+    <CartContext.Provider value={{ cart, addToCart, updateCartItem, removeFromCart }}>
       {children}
     </CartContext.Provider>
   );
-}
-
-export function useCart() {
-  return useContext(CartContext);
 }

@@ -1,11 +1,39 @@
+// frontend/pages/dashboard/[id].js
 import { useRouter } from "next/router";
 import Airtable from "airtable";
+import { useEffect } from "react";
+import { useClient } from "../../context/ClientContext";  // <-- import kontekstu
 import SuborderCard from "../../components/Dashboard/SuborderCard";
 
 export default function OrderDetailsPage({ orderData, suborders }) {
   const router = useRouter();
-  const { id } = router.query;
+  // Wyciągamy z URL-a: /dashboard/[id]?client=Coś
+  const { id, client: queryClient } = router.query;
 
+  // Z kontekstu wyciągamy bieżącego klienta i setter
+  const { selectedClient, setSelectedClient } = useClient();
+
+  // Jeśli w URL jest ?client=..., a w kontekście jest inna wartość, to ją ustawiamy:
+  useEffect(() => {
+    if (queryClient && selectedClient !== queryClient) {
+      setSelectedClient(queryClient);
+    }
+  }, [queryClient, selectedClient, setSelectedClient]);
+
+  // Gdy user trafi bez parametru client=, można wyświetlić info
+  if (!queryClient) {
+    return (
+      <div style={{ padding: "20px" }}>
+        <h1>Brak parametru klienta w URL</h1>
+        <p>
+          Proszę wrócić na stronę główną i wybrać klienta lub skorzystać z
+          panelu <a href="/dashboard">/dashboard</a>.
+        </p>
+      </div>
+    );
+  }
+
+  // Jeśli z bazy nie znaleziono zamówienia
   if (!orderData) {
     return (
       <div style={{ padding: "20px" }}>
@@ -15,52 +43,50 @@ export default function OrderDetailsPage({ orderData, suborders }) {
     );
   }
 
-  // Prosta funkcja callback do kliknięcia "Zrób domówienie"
-  const handleDomowienie = (sub) => {
-    alert(`Tutaj kiedyś zrobimy domówienie dla podzamówienia: ${sub.suborderNumber}`);
-  };
-
+  // Rendering szczegółów
   return (
     <div style={{ padding: "20px" }}>
       <h1>Szczegóły zamówienia: {id}</h1>
-
-      <p><strong>Klient:</strong> {orderData.klient}</p>
-      <p><strong>Status płatności:</strong> {orderData.statusPlatnosci}</p>
-      <p><strong>Data dodania zamówienia:</strong> {orderData.dataDodania}</p>
-      <p><strong>Data do wysyłki:</strong> {orderData.dataWysylki}</p>
+      <p>
+        <strong>Klient (z bazy):</strong> {orderData.klient}
+      </p>
+      <p>
+        <strong>Klient (z kontekstu):</strong> {selectedClient || "Brak"}
+      </p>
+      <p>
+        <strong>Status płatności:</strong> {orderData.statusPlatnosci}
+      </p>
+      <p>
+        <strong>Data dodania zamówienia:</strong> {orderData.dataDodania}
+      </p>
+      <p>
+        <strong>Data do wysyłki:</strong> {orderData.dataWysylki}
+      </p>
 
       <hr style={{ margin: "20px 0" }} />
 
-
-<h2>Podzamówienia (Suborders)</h2>
-{suborders.length === 0 ? (
-  <p>Brak podzamówień w tym zamówieniu.</p>
-) : (
-  <div style={detailsStyles.subordersGrid}>
-    {suborders.map((sub) => (
-      <SuborderCard key={sub.id} sub={sub} />
-    ))}
-  </div>
-)}
-
-
-
+      <h2>Podzamówienia (Suborders)</h2>
+      {suborders.length === 0 ? (
+        <p>Brak podzamówień w tym zamówieniu.</p>
+      ) : (
+        <div style={detailsStyles.subordersGrid}>
+          {suborders.map((sub) => (
+            <SuborderCard key={sub.id} sub={sub} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
-const styles = {
-  subordersGrid: {
-    display: "flex",
-    flexWrap: "wrap",
-  },
-};
-
-// getServerSideProps – bez zmian, identyczny jak poprzednio
+// getServerSideProps – pobiera dane zamówienia + suborders z Airtable
 export async function getServerSideProps(context) {
   const { id } = context.params;
-  const base = new Airtable({ apiKey: process.env.AIRTABLE_ACCESS_TOKEN }).base(process.env.AIRTABLE_BASE_ID);
+  const base = new Airtable({
+    apiKey: process.env.AIRTABLE_ACCESS_TOKEN,
+  }).base(process.env.AIRTABLE_BASE_ID);
 
+  // 1) Pobieramy główne zamówienie z "Zlecenia bez podziału"
   const tableName = "Zlecenia bez podziału";
   const fieldName = "Zamówienie";
 
@@ -95,7 +121,7 @@ export async function getServerSideProps(context) {
     statusPlatnosci: orderRecord.fields["Status płatności"] || "Brak statusu płatności",
   };
 
-  // Suborders
+  // 2) Pobieramy subzamówienia z tabeli "Orders"
   let suborders = [];
   try {
     const subRecords = await base("Orders")
@@ -109,8 +135,8 @@ export async function getServerSideProps(context) {
       const productName = rec.fields["Nazwa produktu"] || "Brak nazwy";
 
       let images = [];
-      if (Array.isArray(rec.fields["Wizka"])) {
-        images = rec.fields["Wizka"].map((att) => att.url);
+      if (Array.isArray(rec.fields["Wizka mini"])) {
+        images = rec.fields["Wizka mini"].map((att) => att.url);
       }
 
       return {
@@ -133,9 +159,9 @@ export async function getServerSideProps(context) {
 }
 
 const detailsStyles = {
-    subordersGrid: {
-      display: "flex",
-      flexWrap: "wrap",
-      gap: "20px",
-    },
-  };
+  subordersGrid: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "20px",
+  },
+};

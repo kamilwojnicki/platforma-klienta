@@ -1,12 +1,15 @@
+// frontend/components/Dashboard/OrdersInProgress.js
 import Link from "next/link";
 import styles from "./dashboardTable.module.css";
+import { useClient } from "../../context/ClientContext";
+import { Button } from "@mui/material";
 
 export default function OrdersInProgress({ orders }) {
-  // 'orders' to już przefiltrowane i posortowane 'inProgress' z API
+  const { selectedClient } = useClient();
+
   return (
     <div className={styles.container}>
       <h2>Trwające zamówienia</h2>
-
       {orders.length === 0 ? (
         <p>Brak trwających zamówień.</p>
       ) : (
@@ -43,9 +46,23 @@ export default function OrdersInProgress({ orders }) {
                 <td className={styles.td}>{order.dataDodania}</td>
                 <td className={styles.td}>{order.dataWysylki}</td>
                 <td className={styles.td}>
-                <Link href={`/dashboard/${order.numerZamowienia}`}>
-  <button className={styles.button}>Zobacz szczegóły</button>
-</Link>
+                  {selectedClient ? (
+                    <Link
+                      href={`/dashboard/${order.numerZamowienia}?client=${encodeURIComponent(
+                        selectedClient
+                      )}`}
+                      passHref
+                      legacyBehavior
+                    >
+                      <Button variant="contained" size="small">
+                        Szczegóły
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Button variant="contained" size="small" disabled>
+                      Szczegóły
+                    </Button>
+                  )}
                 </td>
               </tr>
             ))}

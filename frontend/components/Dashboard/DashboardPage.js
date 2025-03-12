@@ -1,26 +1,25 @@
+// frontend/components/Dashboard/DashboardPage.js
 import { useEffect, useState } from "react";
+import { useClient } from "../../context/ClientContext"; 
 import OrdersInProgress from "./OrdersInProgress";
 import OrdersHistory from "./OrdersHistory";
+import LoadingDots from "../../components/LoadingDots";
 
 export default function DashboardPage() {
-  const [selectedClient, setSelectedClient] = useState("Piko-Sport");
-
-  // Zamiast "orders", mamy "inProgress" i "last5History"
+  const { selectedClient } = useClient();   // <-- stan wybranego klienta z kontekstu
+  const [loading, setLoading] = useState(false);
   const [inProgress, setInProgress] = useState([]);
   const [last5History, setLast5History] = useState([]);
 
-  const [loading, setLoading] = useState(true);
-
-  const clients = ["Piko-Sport", "66 projekt", "SoundVoice OÜ"];
-
   useEffect(() => {
+    if (!selectedClient) return;
+
     setLoading(true);
     fetch(`/api/orders?client=${encodeURIComponent(selectedClient)}&mode=dashboard`)
       .then((res) => res.json())
       .then((data) => {
-        // data = { inProgress: [...], last5History: [...] }
-        setInProgress(data.inProgress);
-        setLast5History(data.last5History);
+        setInProgress(data.inProgress || []);
+        setLast5History(data.last5History || []);
         setLoading(false);
       })
       .catch((err) => {
@@ -29,35 +28,30 @@ export default function DashboardPage() {
       });
   }, [selectedClient]);
 
+  // Jeśli nie wybrano klienta, informujemy o konieczności powrotu do strony głównej
+  if (!selectedClient) {
+    return (
+      <div style={styles.container}>
+        <h1>Brak wybranego klienta</h1>
+        <p>
+          <a href="/">Wróć na stronę główną</a> i wybierz klienta.
+        </p>
+      </div>
+    );
+  }
+
   if (loading) {
-    return <p>Ładowanie dashboardu...</p>;
+    return <LoadingDots />;
   }
 
   return (
     <div style={styles.container}>
       <h1>Witaj w swoim panelu!</h1>
 
-      {/* Wybór klienta */}
-      <div style={styles.clientSelector}>
-        <label htmlFor="clientSelect" style={{ marginRight: "10px" }}>
-          Wybierz klienta:
-        </label>
-        <select
-          id="clientSelect"
-          value={selectedClient}
-          onChange={(e) => setSelectedClient(e.target.value)}
-          style={styles.select}
-        >
-          {clients.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* Przekazujemy inProgress i last5History do modułów */}
+      {/* TRWAJĄCE ZAMÓWIENIA */}
       <OrdersInProgress orders={inProgress} />
+
+      {/* HISTORIA (ostatnie 5) */}
       <OrdersHistory orders={last5History} />
     </div>
   );
@@ -67,11 +61,5 @@ const styles = {
   container: {
     padding: "20px",
     fontFamily: "Arial, sans-serif",
-  },
-  clientSelector: {
-    marginBottom: "20px",
-  },
-  select: {
-    padding: "5px",
   },
 };

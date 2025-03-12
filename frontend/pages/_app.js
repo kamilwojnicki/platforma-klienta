@@ -1,13 +1,28 @@
 // frontend/pages/_app.js
+import { ThemeProvider } from "@mui/material/styles";
+import { CacheProvider } from "@emotion/react";
+import theme from "../styles/theme";
+import createEmotionCache from "../utils/createEmotionCache";
 import { CartProvider } from "../context/CartContext";
-import Navbar from "../components/Navbar";  // <-- Importujemy navbar
+import { ClientProvider } from "../context/ClientContext";
+import Navbar from "../components/Navbar";
+import { Toolbar } from "@mui/material";
 
-function MyApp({ Component, pageProps }) {
+const clientSideEmotionCache = createEmotionCache();
+
+function MyApp({ Component, pageProps, emotionCache = clientSideEmotionCache }) {
   return (
-    <CartProvider>
-      <Navbar />  {/* <-- Globalny navbar */}
-      <Component {...pageProps} />  {/* <-- Reszta aplikacji (np. Dashboard, Orders) */}
-    </CartProvider>
+    <CacheProvider value={emotionCache}>
+      <ThemeProvider theme={theme}>
+        <CartProvider>
+          <ClientProvider>
+            <Navbar />
+            <Toolbar />
+            <Component {...pageProps} />
+          </ClientProvider>
+        </CartProvider>
+      </ThemeProvider>
+    </CacheProvider>
   );
 }
 

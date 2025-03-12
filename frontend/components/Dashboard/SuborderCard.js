@@ -1,99 +1,83 @@
 // frontend/components/Dashboard/SuborderCard.js
-
 import { useState } from "react";
-import SuborderProductsModal from "./SuborderProductsModal";
-import ReorderModal from "../ReorderModal";  // Dodajemy modal „Zrób domówienie”
+import AddToCartModal from "../AddToCartModal"; // Upewnij się, że ścieżka jest poprawna
 
 export default function SuborderCard({ sub }) {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [reorderModalOpen, setReorderModalOpen] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
 
-  const handleOpenModal = () => setModalOpen(true);
-  const handleCloseModal = () => setModalOpen(false);
-
-  const handleOpenReorderModal = () => setReorderModalOpen(true);
-  const handleCloseReorderModal = () => setReorderModalOpen(false);
+  const handleOpenModal = () => setIsAdding(true);
+  const handleCloseModal = () => setIsAdding(false);
 
   return (
-    <div style={cardStyles.card}>
+    <div style={styles.card}>
+      {/* Wizualizacja produktu */}
       {sub.images && sub.images.length > 0 ? (
-        <img
-          src={sub.images[0]}
-          alt="Wizka"
-          style={cardStyles.image}
-        />
+        <img src={sub.images[0]} alt="Wizualizacja" style={styles.image} />
       ) : (
-        <div style={cardStyles.noImage}>Brak wizualizacji</div>
+        <div style={styles.noImage}>Brak wizualizacji</div>
       )}
 
-      <div style={cardStyles.info}>
-        <p style={{ margin: 0 }}>
+      {/* Nazwa i szczegóły */}
+      <div style={styles.details}>
+        <h3 style={{ margin: "0 0 10px 0" }}>{sub.productName}</h3>
+        <p style={{ margin: "0 0 5px 0" }}>
           <strong>Numer:</strong> {sub.suborderNumber}
-        </p>
-        <p style={{ margin: 0 }}>
-          <strong>Produkt:</strong> {sub.productName}
         </p>
       </div>
 
-      {/* Przycisk do wyświetlenia pozycji podzamówienia */}
-      <button style={cardStyles.button} onClick={handleOpenModal}>
-        Pokaż pozycje
-      </button>
-
-      {/* Przycisk do otwarcia modala „Zrób domówienie” */}
-      <button style={cardStyles.button} onClick={handleOpenReorderModal}>
+      {/* Przycisk "Zrób domówienie" */}
+      <button onClick={handleOpenModal} style={styles.button}>
         Zrób domówienie
       </button>
 
-      {/* Modal wyświetlający pozycje podzamówienia */}
-      {modalOpen && (
-        <SuborderProductsModal suborderId={sub.suborderNumber} onClose={handleCloseModal} />
-      )}
-
-      {/* Modal „Zrób domówienie” */}
-      {reorderModalOpen && (
-        <ReorderModal suborder={sub} onClose={handleCloseReorderModal} />
+      {/* Modal do dodania nowego zamówienia do koszyka */}
+      {isAdding && (
+        <AddToCartModal
+          suborder={sub}
+          onClose={handleCloseModal}
+        />
       )}
     </div>
   );
 }
 
-const cardStyles = {
+const styles = {
   card: {
-    width: "200px",
-    border: "1px solid #ddd",
-    borderRadius: "5px",
+    display: "flex",
+    alignItems: "flex-start",
     padding: "10px",
     margin: "10px",
-    textAlign: "center",
+    backgroundColor: "#fff",
+    borderRadius: "6px",
+    boxShadow: "0 2px 5px rgba(0,0,0,0.15)",
+    gap: "15px",
   },
   image: {
-    width: "100%",
-    height: "120px",
-    objectFit: "cover",
-    marginBottom: "8px",
+    width: "150px",
+    height: "auto",
     borderRadius: "4px",
+    objectFit: "cover",
   },
   noImage: {
-    width: "100%",
-    height: "120px",
+    width: "150px",
+    height: "150px",
     background: "#f4f4f4",
-    borderRadius: "4px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     color: "#777",
-    marginBottom: "8px",
+    borderRadius: "4px",
   },
-  info: {
-    marginBottom: "8px",
+  details: {
+    flex: 1,
   },
   button: {
-    padding: "6px 10px",
-    cursor: "pointer",
+    padding: "8px 12px",
+    backgroundColor: "#007bff",
+    color: "white",
     border: "none",
-    backgroundColor: "#ccc",
     borderRadius: "4px",
-    marginTop: "5px",
+    cursor: "pointer",
+    alignSelf: "flex-start",
   },
 };
