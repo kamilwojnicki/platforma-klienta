@@ -20,7 +20,7 @@ export default function LoadingDots() {
       }}
     >
       <Typography variant="h6" sx={{ display: "flex", alignItems: "center" }}>
-        <Box
+        <Box 
           component="span"
           sx={{
             display: "inline-block",

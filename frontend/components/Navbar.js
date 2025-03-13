@@ -1,5 +1,5 @@
 // frontend/components/Navbar.js
-import { AppBar, Toolbar, Box, Button, Badge } from "@mui/material";
+import { AppBar, Toolbar, Box, Button, Badge, Typography } from "@mui/material";
 import Link from "next/link";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useCart } from "../context/CartContext";
@@ -7,7 +7,7 @@ import { useClient } from "../context/ClientContext";
 
 export default function Navbar() {
   const { cart } = useCart();
-  const { selectedClient } = useClient();
+  const { selectedClient } = useClient(); // obiekt { recordId, clientName }
 
   return (
     <AppBar
@@ -41,12 +41,10 @@ export default function Navbar() {
           </Button>
         </Link>
 
-        {/* Link do „Historia zamówień” → /dashboard/history?client=... TYLKO jeśli selectedClient nie jest nullem */}
+        {/* Link do historia zamówień */}
         {selectedClient && (
           <Link
-            href={`/dashboard/history?client=${encodeURIComponent(
-              selectedClient
-            )}`}
+            href={`/dashboard/history?client=${encodeURIComponent(selectedClient.recordId)}`}
             passHref
             legacyBehavior
           >
@@ -56,8 +54,14 @@ export default function Navbar() {
           </Link>
         )}
 
-        {/* „Elastyczna” przestrzeń */}
         <Box sx={{ flexGrow: 1 }} />
+
+        {/* Informacja o zalogowanym kliencie */}
+        {selectedClient && (
+          <Typography variant="body1" sx={{ mr: 2 }}>
+            Zalogowany jako: {selectedClient.clientName}
+          </Typography>
+        )}
 
         {/* Koszyk */}
         <Link href="/cart" passHref legacyBehavior>

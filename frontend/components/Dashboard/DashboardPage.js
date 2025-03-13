@@ -1,12 +1,12 @@
 // frontend/components/Dashboard/DashboardPage.js
 import { useEffect, useState } from "react";
-import { useClient } from "../../context/ClientContext"; 
+import { useClient } from "../../context/ClientContext";
 import OrdersInProgress from "./OrdersInProgress";
 import OrdersHistory from "./OrdersHistory";
 import LoadingDots from "../../components/LoadingDots";
 
 export default function DashboardPage() {
-  const { selectedClient } = useClient();   // <-- stan wybranego klienta z kontekstu
+  const { selectedClient } = useClient(); // obiekt { recordId, clientName } lub null
   const [loading, setLoading] = useState(false);
   const [inProgress, setInProgress] = useState([]);
   const [last5History, setLast5History] = useState([]);
@@ -15,7 +15,8 @@ export default function DashboardPage() {
     if (!selectedClient) return;
 
     setLoading(true);
-    fetch(`/api/orders?client=${encodeURIComponent(selectedClient)}&mode=dashboard`)
+    // Filtrowanie zamówień po recordId
+    fetch(`/api/orders?client=${encodeURIComponent(selectedClient.recordId)}&mode=dashboard`)
       .then((res) => res.json())
       .then((data) => {
         setInProgress(data.inProgress || []);
@@ -28,7 +29,6 @@ export default function DashboardPage() {
       });
   }, [selectedClient]);
 
-  // Jeśli nie wybrano klienta, informujemy o konieczności powrotu do strony głównej
   if (!selectedClient) {
     return (
       <div style={styles.container}>
@@ -46,12 +46,9 @@ export default function DashboardPage() {
 
   return (
     <div style={styles.container}>
-      <h1>Witaj w swoim panelu!</h1>
+      <h1>Witaj w swoim panelu, {selectedClient.clientName}!</h1>
 
-      {/* TRWAJĄCE ZAMÓWIENIA */}
       <OrdersInProgress orders={inProgress} />
-
-      {/* HISTORIA (ostatnie 5) */}
       <OrdersHistory orders={last5History} />
     </div>
   );
