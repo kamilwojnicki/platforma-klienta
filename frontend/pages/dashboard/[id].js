@@ -1,34 +1,20 @@
 // frontend/pages/dashboard/[id].js
 import { useRouter } from "next/router";
 import Airtable from "airtable";
-import { useEffect } from "react";
-import { useClient } from "../../context/ClientContext";  // <-- import kontekstu
+import { useClient } from "../../context/ClientContext";
 import SuborderCard from "../../components/Dashboard/SuborderCard";
 
 export default function OrderDetailsPage({ orderData, suborders }) {
   const router = useRouter();
-  // Wyciągamy z URL-a: /dashboard/[id]?client=Coś
-  const { id, client: queryClient } = router.query;
+  const { id } = router.query; // Tylko numer zamówienia
+  const { selectedClient } = useClient(); // Obiekt z { recordId, clientName }
 
-  // Z kontekstu wyciągamy bieżącego klienta i setter
-  const { selectedClient, setSelectedClient } = useClient();
-
-  // Jeśli w URL jest ?client=..., a w kontekście jest inna wartość, to ją ustawiamy:
-  useEffect(() => {
-    if (queryClient && selectedClient !== queryClient) {
-      setSelectedClient(queryClient);
-    }
-  }, [queryClient, selectedClient, setSelectedClient]);
-
-  // Gdy user trafi bez parametru client=, można wyświetlić info
-  if (!queryClient) {
+  // Jeśli brak zalogowanego klienta w kontekście, wyświetlamy błąd
+  if (!selectedClient) {
     return (
       <div style={{ padding: "20px" }}>
-        <h1>Brak parametru klienta w URL</h1>
-        <p>
-          Proszę wrócić na stronę główną i wybrać klienta lub skorzystać z
-          panelu <a href="/dashboard">/dashboard</a>.
-        </p>
+        <h1>Brak wybranego klienta</h1>
+        <p>Proszę się zalogować lub wybrać klienta w panelu.</p>
       </div>
     );
   }
@@ -47,21 +33,11 @@ export default function OrderDetailsPage({ orderData, suborders }) {
   return (
     <div style={{ padding: "20px" }}>
       <h1>Szczegóły zamówienia: {id}</h1>
-      <p>
-        <strong>Klient (z bazy):</strong> {orderData.klient}
-      </p>
-      <p>
-        <strong>Klient (z kontekstu):</strong> {selectedClient || "Brak"}
-      </p>
-      <p>
-        <strong>Status płatności:</strong> {orderData.statusPlatnosci}
-      </p>
-      <p>
-        <strong>Data dodania zamówienia:</strong> {orderData.dataDodania}
-      </p>
-      <p>
-        <strong>Data do wysyłki:</strong> {orderData.dataWysylki}
-      </p>
+      <p><strong>Klient (z bazy):</strong> {orderData.klient}</p>
+      <p><strong>Klient (z kontekstu):</strong> {selectedClient.clientName}</p>
+      <p><strong>Status płatności:</strong> {orderData.statusPlatnosci}</p>
+      <p><strong>Data dodania zamówienia:</strong> {orderData.dataDodania}</p>
+      <p><strong>Data do wysyłki:</strong> {orderData.dataWysylki}</p>
 
       <hr style={{ margin: "20px 0" }} />
 

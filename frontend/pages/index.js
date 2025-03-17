@@ -1,55 +1,22 @@
 // frontend/pages/index.js
+import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useClient } from "../context/ClientContext";
 
-export default function HomePage() {
-  const { setSelectedClient } = useClient();
+export default function Home() {
   const router = useRouter();
+  const { selectedClient } = useClient();
 
-  const handleSelect = (clientName) => {
-    // 1) Ustawiamy w kontekście
-    setSelectedClient(clientName);
-    // 2) Przekierowanie na /dashboard
-    router.push("/dashboard");
-  };
+  useEffect(() => {
+    if (selectedClient) {
+      // Jeśli zalogowany (selectedClient nie jest null), idź do dashboardu
+      router.push("/dashboard");
+    } else {
+      // W przeciwnym razie do strony logowania
+      router.push("/login");
+    }
+  }, [selectedClient, router]);
 
-  return (
-    <div style={{ padding: 20 }}>
-      <h1>Wybierz klienta</h1>
-      <p>Po wybraniu klienta zostaniesz przeniesiony do Dashboardu.</p>
-      <ul style={{ listStyle: "none", paddingLeft: 0 }}>
-        <li>
-          <button
-            style={buttonStyle}
-            onClick={() => handleSelect("Piko-Sport")}
-          >
-            Piko-Sport
-          </button>
-        </li>
-        <li>
-          <button
-            style={buttonStyle}
-            onClick={() => handleSelect("66 projekt")}
-          >
-            66 projekt
-          </button>
-        </li>
-        <li>
-          <button
-            style={buttonStyle}
-            onClick={() => handleSelect("SoundVoice OÜ")}
-          >
-            SoundVoice OÜ
-          </button>
-        </li>
-      </ul>
-    </div>
-  );
+  // Strona główna nie wyświetla treści – służy tylko do przekierowania
+  return null;
 }
-
-const buttonStyle = {
-  margin: "8px 0",
-  padding: "8px 16px",
-  fontSize: "16px",
-  cursor: "pointer",
-};

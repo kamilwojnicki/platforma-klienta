@@ -24,3 +24,8 @@ export function ClientProvider({ children }) {
 export function useClient() {
   return useContext(ClientContext);
 }
+
+export function logoutClient(setSelectedClient) {
+  setSelectedClient(null);
+  localStorage.removeItem("selectedClient");
+}

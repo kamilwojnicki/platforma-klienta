@@ -46,9 +46,7 @@ export default function OrdersHistory({ orders }) {
                 <td className={styles.td}>
                   {selectedClient ? (
                     <Link
-                      href={`/dashboard/${order.numerZamowienia}?client=${encodeURIComponent(
-                        selectedClient
-                      )}`}
+                    href={`/dashboard/${order.numerZamowienia}`}
                       passHref
                       legacyBehavior
                     >
@@ -70,7 +68,7 @@ export default function OrdersHistory({ orders }) {
 
       {selectedClient ? (
         <Link
-          href={`/dashboard/history?client=${encodeURIComponent(selectedClient)}`}
+          href={`/dashboard/history`}
           passHref
           legacyBehavior
         >

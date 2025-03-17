@@ -48,9 +48,7 @@ export default function OrdersInProgress({ orders }) {
                 <td className={styles.td}>
                   {selectedClient ? (
                     <Link
-                      href={`/dashboard/${order.numerZamowienia}?client=${encodeURIComponent(
-                        selectedClient
-                      )}`}
+                      href={`/dashboard/${order.numerZamowienia}`}
                       passHref
                       legacyBehavior
                     >

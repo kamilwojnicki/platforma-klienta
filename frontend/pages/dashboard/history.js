@@ -1,26 +1,21 @@
 // frontend/pages/dashboard/history.js
-
-import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-// Dodajemy Link z Next.js i Button z Material UI:
+import { useClient } from "../../context/ClientContext";
 import Link from "next/link";
 import { Button } from "@mui/material";
 import LoadingDots from "../../components/LoadingDots";
-
 import styles from "../../components/Dashboard/dashboardTable.module.css";
 
 export default function AllHistoryPage() {
-  const router = useRouter();
-  const { client } = router.query; // odczyt parametru z URL-a, np. ?client=Piko-Sport
+  const { selectedClient } = useClient();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Dopiero gdy mamy 'client', pobieramy dane
-    if (!client) return;
+    if (!selectedClient) return;
 
     setLoading(true);
-    fetch(`/api/orders?client=${encodeURIComponent(client)}&mode=allHistory`)
+    fetch(`/api/orders?client=${encodeURIComponent(selectedClient.recordId)}&mode=allHistory`)
       .then((res) => res.json())
       .then((data) => {
         setOrders(data);
@@ -30,16 +25,26 @@ export default function AllHistoryPage() {
         console.error("Błąd w allHistory:", err);
         setLoading(false);
       });
-  }, [client]);
+  }, [selectedClient]);
 
   if (loading) {
     return <LoadingDots />;
   }
 
+  if (!selectedClient) {
+    return (
+      <div style={{ padding: "20px" }}>
+        <h1>Brak wybranego klienta</h1>
+        <p>
+          Proszę wrócić na stronę główną i wybrać klienta.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div style={{ padding: "20px" }}>
-      <h1>Wszystkie zrealizowane zamówienia klienta: {client}</h1>
-
+      <h1>Wszystkie zrealizowane zamówienia klienta: {selectedClient.clientName}</h1>
       {orders.length === 0 ? (
         <p>Brak wysłanych zamówień.</p>
       ) : (
@@ -74,13 +79,7 @@ export default function AllHistoryPage() {
                 <td className={styles.td}>{order.dataDodania}</td>
                 <td className={styles.td}>{order.dataWysylki}</td>
                 <td className={styles.td}>
-                  {/* Link do szczegółów zamówienia z parametrem ?client=... */}
-                  <Link
-                    href={`/dashboard/${order.numerZamowienia}?client=${encodeURIComponent(
-                      client
-                    )}`}
-                    passHref
-                  >
+                  <Link href={`/dashboard/${order.numerZamowienia}`} passHref>
                     <Button variant="contained" size="small">
                       Szczegóły
                     </Button>

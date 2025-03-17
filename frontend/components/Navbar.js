@@ -4,10 +4,18 @@ import Link from "next/link";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import { useCart } from "../context/CartContext";
 import { useClient } from "../context/ClientContext";
+import { useRouter } from "next/router";
 
 export default function Navbar() {
   const { cart } = useCart();
-  const { selectedClient } = useClient(); // obiekt { recordId, clientName }
+  const { selectedClient, setSelectedClient } = useClient();
+  const router = useRouter();
+
+  const handleLogout = () => {
+    setSelectedClient(null);
+    localStorage.removeItem("selectedClient");
+    router.push("/login");
+  };
 
   return (
     <AppBar
@@ -34,50 +42,59 @@ export default function Navbar() {
           />
         </Link>
 
-        {/* Link do /dashboard */}
-        <Link href="/dashboard" passHref legacyBehavior>
-          <Button color="inherit" sx={{ textTransform: "none", mr: 2 }}>
-            Dashboard
-          </Button>
-        </Link>
-
-        {/* Link do historia zamówień */}
+        {/* Linki widoczne tylko dla zalogowanych */}
         {selectedClient && (
-          <Link
-            href={`/dashboard/history?client=${encodeURIComponent(selectedClient.recordId)}`}
-            passHref
-            legacyBehavior
-          >
-            <Button color="inherit" sx={{ textTransform: "none", mr: 2 }}>
-              Historia zamówień
-            </Button>
-          </Link>
+          <>
+            <Link href="/dashboard" passHref legacyBehavior>
+              <Button color="inherit" sx={{ textTransform: "none", mr: 2 }}>
+                Dashboard
+              </Button>
+            </Link>
+            <Link href="/dashboard/history" passHref legacyBehavior>
+              <Button color="inherit" sx={{ textTransform: "none", mr: 2 }}>
+                Historia zamówień
+              </Button>
+            </Link>
+          </>
         )}
 
         <Box sx={{ flexGrow: 1 }} />
 
-        {/* Informacja o zalogowanym kliencie */}
-        {selectedClient && (
-          <Typography variant="body1" sx={{ mr: 2 }}>
-            Zalogowany jako: {selectedClient.clientName}
-          </Typography>
-        )}
-
-        {/* Koszyk */}
-        <Link href="/cart" passHref legacyBehavior>
-          <Button color="inherit" sx={{ textTransform: "none" }}>
-            <Badge
-              badgeContent={cart.length}
-              color="error"
-              overlap="circular"
-              anchorOrigin={{ vertical: "top", horizontal: "right" }}
-              sx={{ mr: 1 }}
+        {selectedClient ? (
+          <>
+            <Typography variant="body1" sx={{ mr: 2 }}>
+              Zalogowany jako: {selectedClient.clientName}
+            </Typography>
+            <Button
+              color="inherit"
+              onClick={handleLogout}
+              sx={{ textTransform: "none", mr: 2 }}
             >
-              <ShoppingCartIcon />
-            </Badge>
-            Koszyk
-          </Button>
-        </Link>
+              Wyloguj się
+            </Button>
+            {/* Koszyk widoczny tylko dla zalogowanych */}
+            <Link href="/cart" passHref legacyBehavior>
+              <Button color="inherit" sx={{ textTransform: "none", ml: 2 }}>
+                <Badge
+                  badgeContent={cart.length}
+                  color="error"
+                  overlap="circular"
+                  anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                  sx={{ mr: 1 }}
+                >
+                  <ShoppingCartIcon />
+                </Badge>
+                Koszyk
+              </Button>
+            </Link>
+          </>
+        ) : (
+          <Link href="/login" passHref legacyBehavior>
+            <Button color="inherit" sx={{ textTransform: "none", mr: 2 }}>
+              Zaloguj się
+            </Button>
+          </Link>
+        )}
       </Toolbar>
     </AppBar>
   );
